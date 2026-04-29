@@ -4,22 +4,27 @@ Two ASP.NET Core 10 applications with full observability via the Grafana LGTM st
 
 ## Architecture
 
-```
-[Client] → HTTP → [FrontendApi] → gRPC → [BackendService]
-                        |                       |
-                   OTLP (4317)             OTLP (4317)
-                        |                       |
-                        └───────────┬───────────┘
-                                    ▼
-                            [Grafana Alloy]
-                           /       |       \
-                     Traces    Metrics     Logs
-                        ▼         ▼          ▼
-                    [Tempo]  [Prometheus]  [Loki]
-                         \        |        /
-                          └───────┼───────┘
-                                  ▼
-                             [Grafana]
+```mermaid
+flowchart LR
+    Client([Client])
+    FrontendApi[FrontendApi]
+    BackendService[BackendService]
+    Alloy[Grafana Alloy]
+    Tempo[Tempo]
+    Prometheus[Prometheus]
+    Loki[Loki]
+    Grafana[Grafana]
+
+    Client -->|HTTP| FrontendApi
+    FrontendApi -->|gRPC| BackendService
+    FrontendApi -->|"OTLP (4317)"| Alloy
+    BackendService -->|"OTLP (4317)"| Alloy
+    Alloy -->|Traces| Tempo
+    Alloy -->|Metrics| Prometheus
+    Alloy -->|Logs| Loki
+    Tempo --> Grafana
+    Prometheus --> Grafana
+    Loki --> Grafana
 ```
 
 ## Applications
