@@ -1,0 +1,65 @@
+// Grafana Alloy configuration
+// Receives OTLP from .NET apps → forwards to Tempo (traces), Prometheus (metrics), Loki (logs)
+
+// ============================================================
+// OTLP Receiver — accepts gRPC (4317) and HTTP (4318) from apps
+// ============================================================
+otelcol.receiver.otlp "default" {
+  grpc {
+    endpoint = "0.0.0.0:4317"
+  }
+  http {
+    endpoint = "0.0.0.0:4318"
+  }
+
+  output {
+    traces  = [otelcol.processor.batch.default.input]
+    metrics = [otelcol.processor.batch.default.input]
+    logs    = [otelcol.processor.batch.default.input]
+  }
+}
+
+// ============================================================
+// Batch Processor — batches telemetry before exporting
+// ============================================================
+otelcol.processor.batch "default" {
+  output {
+    traces  = [otelcol.exporter.otlp.tempo.input]
+    metrics = [otelcol.exporter.prometheus.default.input]
+    logs    = [otelcol.exporter.otlphttp.loki.input]
+  }
+}
+
+// ============================================================
+// Traces → Tempo via OTLP gRPC
+// ============================================================
+otelcol.exporter.otlp "tempo" {
+  client {
+    endpoint = "tempo:4317"
+    tls {
+      insecure = true
+    }
+  }
+}
+
+// ============================================================
+// Metrics → Prometheus scrape endpoint
+// ============================================================
+otelcol.exporter.prometheus "default" {
+  forward_to = [prometheus.remote_write.default.receiver]
+}
+
+prometheus.remote_write "default" {
+  endpoint {
+    url = "http://prometheus:9090/api/v1/write"
+  }
+}
+
+// ============================================================
+// Logs → Loki via OTLP HTTP
+// ============================================================
+otelcol.exporter.otlphttp "loki" {
+  client {
+    endpoint = "http://loki:3100/otlp"
+  }
+}

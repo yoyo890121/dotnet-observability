@@ -1,0 +1,9 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/BackendService/BackendService.csproj" />
+    <Project Path="src/FrontendApi/FrontendApi.csproj" />
+  </Folder>
+  <Folder Name="/src/Shared/">
+    <Project Path="src/Shared/Protos/Protos.csproj" />
+  </Folder>
+</Solution>
