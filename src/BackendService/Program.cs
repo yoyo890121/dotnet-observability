@@ -12,7 +12,9 @@ builder.Services.AddGrpc();
 var otelEndpoint = builder.Configuration["OTEL_EXPORTER_OTLP_ENDPOINT"] ?? "http://localhost:4317";
 
 builder.Services.AddOpenTelemetry()
-    .ConfigureResource(r => r.AddService("BackendService"))
+    .ConfigureResource(r => r
+        .AddService("BackendService")
+        .AddContainerDetector())
     .WithTracing(t => t
         .AddAspNetCoreInstrumentation()
         .AddOtlpExporter(o => o.Endpoint = new Uri(otelEndpoint)))

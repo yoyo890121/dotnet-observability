@@ -18,7 +18,9 @@ builder.Services.AddGrpcClient<OrderService.OrderServiceClient>(o =>
 var otelEndpoint = builder.Configuration["OTEL_EXPORTER_OTLP_ENDPOINT"] ?? "http://localhost:4317";
 
 builder.Services.AddOpenTelemetry()
-    .ConfigureResource(r => r.AddService("FrontendApi"))
+    .ConfigureResource(r => r
+        .AddService("FrontendApi")
+        .AddContainerDetector())
     .WithTracing(t => t
         .AddAspNetCoreInstrumentation()
         .AddHttpClientInstrumentation()
